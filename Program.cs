@@ -25,36 +25,49 @@ namespace Address_Book
             Console.WriteLine($"Phone  : {Phone}");
             Console.WriteLine($"Email  : {Email}");
         }
+
+        
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+                return false;
+
+            Contact other = (Contact)obj;
+
+            return FirstName.Equals(other.FirstName, StringComparison.OrdinalIgnoreCase) &&
+                   LastName.Equals(other.LastName, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public override int GetHashCode()
+        {
+            return (FirstName + LastName).ToLower().GetHashCode();
+        }
     }
 
     public class AddressBook
     {
         private readonly List<Contact> contacts = new List<Contact>();
 
+        
         public void AddContact(Contact contact)
         {
+            bool duplicate = contacts.Exists(c => c.Equals(contact));
+
+            if (duplicate)
+            {
+                Console.WriteLine("\nDuplicate Contact! Cannot Add.");
+                return;
+            }
+
             contacts.Add(contact);
             Console.WriteLine("\nContact added successfully!");
-        }
-
-        public Contact FindContactByName(string firstName, string lastName)
-        {
-            foreach (Contact c in contacts)
-            {
-                if (c.FirstName.Equals(firstName, StringComparison.OrdinalIgnoreCase) &&
-                    c.LastName.Equals(lastName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return c;
-                }
-            }
-            return null;
         }
 
         public void EditContactUsingConsole()
         {
             Console.Write("\nEnter First Name to edit: ");
             string first = Console.ReadLine();
-            Console.Write("Enter Last Name to edit: ");
+            Console.Write("Enter Last Name to edit : ");
             string last = Console.ReadLine();
 
             Contact contact = FindContactByName(first, last);
@@ -76,11 +89,22 @@ namespace Address_Book
             Console.WriteLine("Contact updated!");
         }
 
+        public Contact FindContactByName(string first, string last)
+        {
+            foreach (var c in contacts)
+            {
+                if (c.FirstName.Equals(first, StringComparison.OrdinalIgnoreCase) &&
+                    c.LastName.Equals(last, StringComparison.OrdinalIgnoreCase))
+                    return c;
+            }
+            return null;
+        }
+
         public void DeleteContactUsingConsole()
         {
             Console.Write("\nEnter First Name to delete: ");
             string first = Console.ReadLine();
-            Console.Write("Enter Last Name to delete: ");
+            Console.Write("Enter Last Name to delete : ");
             string last = Console.ReadLine();
 
             Contact contact = FindContactByName(first, last);
@@ -103,7 +127,7 @@ namespace Address_Book
                 return;
             }
 
-            Console.WriteLine("\nContacts in this Address Book:");
+            Console.WriteLine("\nContacts:");
             foreach (var c in contacts)
                 c.Display();
         }
@@ -149,9 +173,7 @@ namespace Address_Book
                         string name = Console.ReadLine();
 
                         if (addressBooks.ContainsKey(name))
-                        {
                             Console.WriteLine("Address Book already exists!");
-                        }
                         else
                         {
                             addressBooks[name] = new AddressBook();
@@ -180,21 +202,21 @@ namespace Address_Book
                         }
 
                         AddressBook book = addressBooks[selected];
-                        bool insideBook = true;
+                        bool inside = true;
 
-                        while (insideBook)
+                        while (inside)
                         {
-                            Console.WriteLine($"\nIn Address Book: {selected}");
+                            Console.WriteLine($"\n Address Book: {selected}");
                             Console.WriteLine("1. Add Contact");
                             Console.WriteLine("2. Edit Contact");
                             Console.WriteLine("3. Delete Contact");
                             Console.WriteLine("4. Display Contacts");
-                            Console.WriteLine("5. Back to Main Menu");
-                            Console.Write("Enter choice: ");
+                            Console.WriteLine("5. Back");
+                            Console.Write("Choice: ");
 
-                            string choice = Console.ReadLine();
+                            string c = Console.ReadLine();
 
-                            switch (choice)
+                            switch (c)
                             {
                                 case "1":
                                     book.AddContact(book.CreateContactFromConsole());
@@ -209,7 +231,7 @@ namespace Address_Book
                                     book.DisplayAllContacts();
                                     break;
                                 case "5":
-                                    insideBook = false;
+                                    inside = false;
                                     break;
                                 default:
                                     Console.WriteLine("Invalid choice!");
@@ -228,7 +250,7 @@ namespace Address_Book
                 }
             }
 
-            Console.WriteLine("Goodbye!");
+            Console.WriteLine("\nGoodbye!");
         }
     }
 }
