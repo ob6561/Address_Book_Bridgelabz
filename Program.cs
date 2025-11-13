@@ -63,6 +63,17 @@ namespace Address_Book
             Console.WriteLine("\nContact added successfully!");
         }
 
+        public Contact FindContactByName(string first, string last)
+        {
+            foreach (var c in contacts)
+            {
+                if (c.FirstName.Equals(first, StringComparison.OrdinalIgnoreCase) &&
+                    c.LastName.Equals(last, StringComparison.OrdinalIgnoreCase))
+                    return c;
+            }
+            return null;
+        }
+
         public void EditContactUsingConsole()
         {
             Console.Write("\nEnter First Name to edit: ");
@@ -78,26 +89,31 @@ namespace Address_Book
                 return;
             }
 
-            Console.Write("New Address: ");
+            Console.Write("New Address (leave blank to keep same): ");
             string input = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(input)) contact.Address = input;
 
-            Console.Write("New City: ");
+            Console.Write("New City (leave blank to keep same): ");
             input = Console.ReadLine();
             if (!string.IsNullOrWhiteSpace(input)) contact.City = input;
 
-            Console.WriteLine("Contact updated!");
-        }
+            Console.Write("New State (leave blank to keep same): ");
+            input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input)) contact.State = input;
 
-        public Contact FindContactByName(string first, string last)
-        {
-            foreach (var c in contacts)
-            {
-                if (c.FirstName.Equals(first, StringComparison.OrdinalIgnoreCase) &&
-                    c.LastName.Equals(last, StringComparison.OrdinalIgnoreCase))
-                    return c;
-            }
-            return null;
+            Console.Write("New Zip (leave blank to keep same): ");
+            input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input)) contact.Zip = input;
+
+            Console.Write("New Phone (leave blank to keep same): ");
+            input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input)) contact.Phone = input;
+
+            Console.Write("New Email (leave blank to keep same): ");
+            input = Console.ReadLine();
+            if (!string.IsNullOrWhiteSpace(input)) contact.Email = input;
+
+            Console.WriteLine("Contact updated!");
         }
 
         public void DeleteContactUsingConsole()
@@ -147,6 +163,35 @@ namespace Address_Book
 
             return c;
         }
+
+        
+        public List<Contact> GetContactsByCity(string city)
+        {
+            List<Contact> results = new List<Contact>();
+            foreach (var c in contacts)
+            {
+                if (c.City != null &&
+                    c.City.Equals(city, StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(c);
+                }
+            }
+            return results;
+        }
+
+        public List<Contact> GetContactsByState(string state)
+        {
+            List<Contact> results = new List<Contact>();
+            foreach (var c in contacts)
+            {
+                if (c.State != null &&
+                    c.State.Equals(state, StringComparison.OrdinalIgnoreCase))
+                {
+                    results.Add(c);
+                }
+            }
+            return results;
+        }
     }
 
     internal class AddressBookMain
@@ -161,7 +206,8 @@ namespace Address_Book
                 Console.WriteLine("\nMAIN MENU...");
                 Console.WriteLine("1. Create New Address Book");
                 Console.WriteLine("2. Select Address Book");
-                Console.WriteLine("3. Exit");
+                Console.WriteLine("3. Search Person by City/State (Across All Address Books)");
+                Console.WriteLine("4. Exit");
                 Console.Write("Enter choice: ");
 
                 string mainChoice = Console.ReadLine();
@@ -206,7 +252,7 @@ namespace Address_Book
 
                         while (inside)
                         {
-                            Console.WriteLine($"\n Address Book: {selected}");
+                            Console.WriteLine($"\n--- Address Book: {selected} ---");
                             Console.WriteLine("1. Add Contact");
                             Console.WriteLine("2. Edit Contact");
                             Console.WriteLine("3. Delete Contact");
@@ -241,6 +287,38 @@ namespace Address_Book
                         break;
 
                     case "3":
+                        
+                        if (addressBooks.Count == 0)
+                        {
+                            Console.WriteLine("No Address Books available!");
+                            break;
+                        }
+
+                        Console.WriteLine("\nSearch by:");
+                        Console.WriteLine("1. City");
+                        Console.WriteLine("2. State");
+                        Console.Write("Enter choice: ");
+                        string searchChoice = Console.ReadLine();
+
+                        if (searchChoice == "1")
+                        {
+                            Console.Write("\nEnter City Name: ");
+                            string city = Console.ReadLine();
+                            SearchAcrossAllAddressBooksByCity(addressBooks, city);
+                        }
+                        else if (searchChoice == "2")
+                        {
+                            Console.Write("\nEnter State Name: ");
+                            string state = Console.ReadLine();
+                            SearchAcrossAllAddressBooksByState(addressBooks, state);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid search choice!");
+                        }
+                        break;
+
+                    case "4":
                         running = false;
                         break;
 
@@ -251,6 +329,74 @@ namespace Address_Book
             }
 
             Console.WriteLine("\nGoodbye!");
+        }
+
+        
+        private static void SearchAcrossAllAddressBooksByCity(
+            Dictionary<string, AddressBook> addressBooks, string city)
+        {
+            int totalMatches = 0;
+
+            foreach (var pair in addressBooks)
+            {
+                string abName = pair.Key;
+                AddressBook ab = pair.Value;
+
+                List<Contact> matches = ab.GetContactsByCity(city);
+
+                if (matches.Count > 0)
+                {
+                    Console.WriteLine($"\nAddress Book: {abName}");
+                    foreach (var contact in matches)
+                    {
+                        contact.Display();
+                        totalMatches++;
+                    }
+                }
+            }
+
+            if (totalMatches == 0)
+            {
+                Console.WriteLine("\nNo persons found in the given city.");
+            }
+            else
+            {
+                Console.WriteLine($"\nTotal persons found in city \"{city}\": {totalMatches}");
+            }
+        }
+
+        
+        private static void SearchAcrossAllAddressBooksByState(
+            Dictionary<string, AddressBook> addressBooks, string state)
+        {
+            int totalMatches = 0;
+
+            foreach (var pair in addressBooks)
+            {
+                string abName = pair.Key;
+                AddressBook ab = pair.Value;
+
+                List<Contact> matches = ab.GetContactsByState(state);
+
+                if (matches.Count > 0)
+                {
+                    Console.WriteLine($"\nAddress Book: {abName}");
+                    foreach (var contact in matches)
+                    {
+                        contact.Display();
+                        totalMatches++;
+                    }
+                }
+            }
+
+            if (totalMatches == 0)
+            {
+                Console.WriteLine("\nNo persons found in the given state.");
+            }
+            else
+            {
+                Console.WriteLine($"\nTotal persons found in state \"{state}\": {totalMatches}");
+            }
         }
     }
 }
