@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Address_Book
 {
+    
     public class Contact
     {
         public string FirstName { get; set; }
@@ -27,8 +28,10 @@ namespace Address_Book
         }
     }
 
+    // AddressBook uses a Collection (List<Contact>) to store MULTIPLE persons
     public class AddressBook
     {
+        // ✅ Collection class as required by UC5
         private readonly List<Contact> contacts = new List<Contact>();
 
         public void AddContact(Contact contact)
@@ -109,7 +112,6 @@ namespace Address_Book
             Console.WriteLine("\nContact updated successfully!");
         }
 
-        
         public void DeleteContactUsingConsole()
         {
             if (contacts.Count == 0)
@@ -144,11 +146,14 @@ namespace Address_Book
                 return;
             }
 
-            Console.WriteLine("\nAddress Book Contacts...");
+            Console.WriteLine("\nAddress Book Contacts....");
             foreach (var contact in contacts)
+            {
                 contact.Display();
+            }
         }
 
+        
         public Contact CreateContactFromConsole()
         {
             Contact contact = new Contact();
@@ -192,41 +197,26 @@ namespace Address_Book
 
             while (running)
             {
-                Console.WriteLine("\n MENU...");
+                Console.WriteLine("\nMENU....");
                 Console.WriteLine("1. Add New Contact");
                 Console.WriteLine("2. Edit Existing Contact");
                 Console.WriteLine("3. Delete Contact");
                 Console.WriteLine("4. Display All Contacts");
                 Console.WriteLine("5. Exit");
-                Console.Write("Enter choice: ");
+                Console.Write("Enter your choice: ");
 
                 string choice = Console.ReadLine();
 
                 switch (choice)
                 {
                     case "1":
+                        // 👇 UC5: add multiple persons one by one by calling this again and again
                         Contact c = addressBook.CreateContactFromConsole();
                         addressBook.AddContact(c);
                         break;
 
-                    case "2":
-                        addressBook.EditContactUsingConsole();
-                        break;
-
-                    case "3":     // ✅ UC4 here
-                        addressBook.DeleteContactUsingConsole();
-                        break;
-
-                    case "4":
-                        addressBook.DisplayAllContacts();
-                        break;
-
-                    case "5":
-                        running = false;
-                        break;
-
                     default:
-                        Console.WriteLine("Invalid choice!");
+                        Console.WriteLine("Invalid choice! Please try again.");
                         break;
                 }
             }
