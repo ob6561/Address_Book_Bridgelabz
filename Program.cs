@@ -223,7 +223,8 @@ namespace Address_Book
                 Console.WriteLine("2. Select Address Book");
                 Console.WriteLine("3. Search Person by City/State (Across All Address Books)");
                 Console.WriteLine("4. View Persons by City/State (Using Dictionaries)");
-                Console.WriteLine("5. Exit");
+                Console.WriteLine("5. Get Count of Persons by City/State");
+                Console.WriteLine("6. Exit");
                 Console.Write("Enter choice: ");
 
                 string mainChoice = Console.ReadLine();
@@ -268,7 +269,7 @@ namespace Address_Book
 
                         while (inside)
                         {
-                            Console.WriteLine($"\nAddress Book:{selected}...");
+                            Console.WriteLine($"\nAddress Book:{selected}");
                             Console.WriteLine("1. Add Contact");
                             Console.WriteLine("2. Edit Contact");
                             Console.WriteLine("3. Delete Contact");
@@ -366,6 +367,37 @@ namespace Address_Book
                         break;
 
                     case "5":
+                        
+                        if (addressBooks.Count == 0)
+                        {
+                            Console.WriteLine("No Address Books available!");
+                            break;
+                        }
+
+                        
+                        RebuildCityStateDictionaries(addressBooks, cityPersons, statePersons);
+
+                        Console.WriteLine("\nGet count of persons by:");
+                        Console.WriteLine("1. City");
+                        Console.WriteLine("2. State");
+                        Console.Write("Enter choice: ");
+                        string countChoice = Console.ReadLine();
+
+                        if (countChoice == "1")
+                        {
+                            CountPersonsByCity(cityPersons);
+                        }
+                        else if (countChoice == "2")
+                        {
+                            CountPersonsByState(statePersons);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid choice!");
+                        }
+                        break;
+
+                    case "6":
                         running = false;
                         break;
 
@@ -508,6 +540,38 @@ namespace Address_Book
                     contact.Display();
 
                 Console.WriteLine($"\nTotal persons: {list.Count}");
+            }
+            else
+            {
+                Console.WriteLine("\nNo persons found in that state.");
+            }
+        }
+
+        
+
+        private static void CountPersonsByCity(Dictionary<string, List<Contact>> cityDict)
+        {
+            Console.Write("\nEnter City Name: ");
+            string city = Console.ReadLine();
+
+            if (cityDict.TryGetValue(city, out var list) && list.Count > 0)
+            {
+                Console.WriteLine($"\nNumber of persons in city \"{city}\": {list.Count}");
+            }
+            else
+            {
+                Console.WriteLine("\nNo persons found in that city.");
+            }
+        }
+
+        private static void CountPersonsByState(Dictionary<string, List<Contact>> stateDict)
+        {
+            Console.Write("\nEnter State Name: ");
+            string state = Console.ReadLine();
+
+            if (stateDict.TryGetValue(state, out var list) && list.Count > 0)
+            {
+                Console.WriteLine($"\nNumber of persons in state \"{state}\": {list.Count}");
             }
             else
             {
