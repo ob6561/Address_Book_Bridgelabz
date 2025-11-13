@@ -165,12 +165,18 @@ namespace Address_Book
         }
 
         
+        public List<Contact> GetAllContacts()
+        {
+            return contacts;
+        }
+
+        
         public List<Contact> GetContactsByCity(string city)
         {
             List<Contact> results = new List<Contact>();
             foreach (var c in contacts)
             {
-                if (c.City != null &&
+                if (!string.IsNullOrWhiteSpace(c.City) &&
                     c.City.Equals(city, StringComparison.OrdinalIgnoreCase))
                 {
                     results.Add(c);
@@ -184,7 +190,7 @@ namespace Address_Book
             List<Contact> results = new List<Contact>();
             foreach (var c in contacts)
             {
-                if (c.State != null &&
+                if (!string.IsNullOrWhiteSpace(c.State) &&
                     c.State.Equals(state, StringComparison.OrdinalIgnoreCase))
                 {
                     results.Add(c);
@@ -198,7 +204,16 @@ namespace Address_Book
     {
         static void Main(string[] args)
         {
-            Dictionary<string, AddressBook> addressBooks = new Dictionary<string, AddressBook>();
+            
+            Dictionary<string, AddressBook> addressBooks =
+                new Dictionary<string, AddressBook>(StringComparer.OrdinalIgnoreCase);
+
+            
+            Dictionary<string, List<Contact>> cityPersons =
+                new Dictionary<string, List<Contact>>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, List<Contact>> statePersons =
+                new Dictionary<string, List<Contact>>(StringComparer.OrdinalIgnoreCase);
+
             bool running = true;
 
             while (running)
@@ -207,7 +222,8 @@ namespace Address_Book
                 Console.WriteLine("1. Create New Address Book");
                 Console.WriteLine("2. Select Address Book");
                 Console.WriteLine("3. Search Person by City/State (Across All Address Books)");
-                Console.WriteLine("4. Exit");
+                Console.WriteLine("4. View Persons by City/State (Using Dictionaries)");
+                Console.WriteLine("5. Exit");
                 Console.Write("Enter choice: ");
 
                 string mainChoice = Console.ReadLine();
@@ -252,7 +268,7 @@ namespace Address_Book
 
                         while (inside)
                         {
-                            Console.WriteLine($"\n--- Address Book: {selected} ---");
+                            Console.WriteLine($"\nAddress Book:{selected}...");
                             Console.WriteLine("1. Add Contact");
                             Console.WriteLine("2. Edit Contact");
                             Console.WriteLine("3. Delete Contact");
@@ -319,6 +335,37 @@ namespace Address_Book
                         break;
 
                     case "4":
+                        
+                        if (addressBooks.Count == 0)
+                        {
+                            Console.WriteLine("No Address Books available!");
+                            break;
+                        }
+
+                        
+                        RebuildCityStateDictionaries(addressBooks, cityPersons, statePersons);
+
+                        Console.WriteLine("\nView persons by:");
+                        Console.WriteLine("1. City");
+                        Console.WriteLine("2. State");
+                        Console.Write("Enter choice: ");
+                        string viewChoice = Console.ReadLine();
+
+                        if (viewChoice == "1")
+                        {
+                            ViewPersonsByCity(cityPersons);
+                        }
+                        else if (viewChoice == "2")
+                        {
+                            ViewPersonsByState(statePersons);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid choice!");
+                        }
+                        break;
+
+                    case "5":
                         running = false;
                         break;
 
@@ -332,6 +379,7 @@ namespace Address_Book
         }
 
         
+
         private static void SearchAcrossAllAddressBooksByCity(
             Dictionary<string, AddressBook> addressBooks, string city)
         {
@@ -356,16 +404,11 @@ namespace Address_Book
             }
 
             if (totalMatches == 0)
-            {
                 Console.WriteLine("\nNo persons found in the given city.");
-            }
             else
-            {
                 Console.WriteLine($"\nTotal persons found in city \"{city}\": {totalMatches}");
-            }
         }
 
-        
         private static void SearchAcrossAllAddressBooksByState(
             Dictionary<string, AddressBook> addressBooks, string state)
         {
@@ -390,12 +433,85 @@ namespace Address_Book
             }
 
             if (totalMatches == 0)
-            {
                 Console.WriteLine("\nNo persons found in the given state.");
+            else
+                Console.WriteLine($"\nTotal persons found in state \"{state}\": {totalMatches}");
+        }
+
+        
+
+        private static void RebuildCityStateDictionaries(
+            Dictionary<string, AddressBook> addressBooks,
+            Dictionary<string, List<Contact>> cityDict,
+            Dictionary<string, List<Contact>> stateDict)
+        {
+            cityDict.Clear();
+            stateDict.Clear();
+
+            foreach (var pair in addressBooks)
+            {
+                AddressBook ab = pair.Value;
+
+                foreach (var contact in ab.GetAllContacts())
+                {
+                    if (!string.IsNullOrWhiteSpace(contact.City))
+                    {
+                        if (!cityDict.TryGetValue(contact.City, out var listByCity))
+                        {
+                            listByCity = new List<Contact>();
+                            cityDict[contact.City] = listByCity;
+                        }
+                        listByCity.Add(contact);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(contact.State))
+                    {
+                        if (!stateDict.TryGetValue(contact.State, out var listByState))
+                        {
+                            listByState = new List<Contact>();
+                            stateDict[contact.State] = listByState;
+                        }
+                        listByState.Add(contact);
+                    }
+                }
+            }
+        }
+
+        private static void ViewPersonsByCity(Dictionary<string, List<Contact>> cityDict)
+        {
+            Console.Write("\nEnter City Name: ");
+            string city = Console.ReadLine();
+
+            if (cityDict.TryGetValue(city, out var list) && list.Count > 0)
+            {
+                Console.WriteLine($"\nPersons in city \"{city}\":");
+                foreach (var contact in list)
+                    contact.Display();
+
+                Console.WriteLine($"\nTotal persons: {list.Count}");
             }
             else
             {
-                Console.WriteLine($"\nTotal persons found in state \"{state}\": {totalMatches}");
+                Console.WriteLine("\nNo persons found in that city.");
+            }
+        }
+
+        private static void ViewPersonsByState(Dictionary<string, List<Contact>> stateDict)
+        {
+            Console.Write("\nEnter State Name: ");
+            string state = Console.ReadLine();
+
+            if (stateDict.TryGetValue(state, out var list) && list.Count > 0)
+            {
+                Console.WriteLine($"\nPersons in state \"{state}\":");
+                foreach (var contact in list)
+                    contact.Display();
+
+                Console.WriteLine($"\nTotal persons: {list.Count}");
+            }
+            else
+            {
+                Console.WriteLine("\nNo persons found in that state.");
             }
         }
     }
