@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Address_Book
 {
-    // Represents one person in the address book
     public class Contact
     {
         public string FirstName { get; set; }
@@ -28,7 +27,6 @@ namespace Address_Book
         }
     }
 
-    // AddressBook holds and manages multiple contacts
     public class AddressBook
     {
         private readonly List<Contact> contacts = new List<Contact>();
@@ -39,7 +37,6 @@ namespace Address_Book
             Console.WriteLine("\nContact added successfully!\n");
         }
 
-        // Find contact by first and last name (case-insensitive)
         public Contact FindContactByName(string firstName, string lastName)
         {
             foreach (var contact in contacts)
@@ -53,12 +50,11 @@ namespace Address_Book
             return null;
         }
 
-        // Edit contact details using console
         public void EditContactUsingConsole()
         {
             if (contacts.Count == 0)
             {
-                Console.WriteLine("\nNo contacts available to edit.");
+                Console.WriteLine("\nNo contacts to edit.");
                 return;
             }
 
@@ -76,52 +72,68 @@ namespace Address_Book
                 return;
             }
 
-            Console.WriteLine("\nExisting details:");
-            contact.Display();
-
             Console.WriteLine("\nEnter new details (leave blank to keep old value):");
 
-            Console.Write("First Name  (" + contact.FirstName + "): ");
+            Console.Write("First Name (" + contact.FirstName + "): ");
             string input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.FirstName = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.FirstName = input;
 
-            Console.Write("Last Name   (" + contact.LastName + "): ");
+            Console.Write("Last Name (" + contact.LastName + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.LastName = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.LastName = input;
 
-            Console.Write("Address     (" + contact.Address + "): ");
+            Console.Write("Address (" + contact.Address + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.Address = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.Address = input;
 
-            Console.Write("City        (" + contact.City + "): ");
+            Console.Write("City (" + contact.City + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.City = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.City = input;
 
-            Console.Write("State       (" + contact.State + "): ");
+            Console.Write("State (" + contact.State + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.State = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.State = input;
 
-            Console.Write("Zip Code    (" + contact.Zip + "): ");
+            Console.Write("Zip (" + contact.Zip + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.Zip = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.Zip = input;
 
-            Console.Write("Phone Number(" + contact.Phone + "): ");
+            Console.Write("Phone (" + contact.Phone + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.Phone = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.Phone = input;
 
-            Console.Write("Email       (" + contact.Email + "): ");
+            Console.Write("Email (" + contact.Email + "): ");
             input = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(input))
-                contact.Email = input;
+            if (!string.IsNullOrWhiteSpace(input)) contact.Email = input;
 
             Console.WriteLine("\nContact updated successfully!");
+        }
+
+        
+        public void DeleteContactUsingConsole()
+        {
+            if (contacts.Count == 0)
+            {
+                Console.WriteLine("\nNo contacts available to delete.");
+                return;
+            }
+
+            Console.Write("\nEnter First Name of contact to delete: ");
+            string firstName = Console.ReadLine();
+
+            Console.Write("Enter Last Name of contact to delete : ");
+            string lastName = Console.ReadLine();
+
+            Contact contact = FindContactByName(firstName, lastName);
+
+            if (contact == null)
+            {
+                Console.WriteLine("\nContact not found!");
+                return;
+            }
+
+            contacts.Remove(contact);
+            Console.WriteLine("\nContact deleted successfully!");
         }
 
         public void DisplayAllContacts()
@@ -132,14 +144,11 @@ namespace Address_Book
                 return;
             }
 
-            Console.WriteLine("\nAddress Book Contacts....");
+            Console.WriteLine("\nAddress Book Contacts...");
             foreach (var contact in contacts)
-            {
                 contact.Display();
-            }
         }
 
-        
         public Contact CreateContactFromConsole()
         {
             Contact contact = new Contact();
@@ -172,7 +181,6 @@ namespace Address_Book
         }
     }
 
-    
     internal class AddressBookMain
     {
         static void Main(string[] args)
@@ -184,36 +192,41 @@ namespace Address_Book
 
             while (running)
             {
-                Console.WriteLine("\nMENU...");
+                Console.WriteLine("\n MENU...");
                 Console.WriteLine("1. Add New Contact");
                 Console.WriteLine("2. Edit Existing Contact");
-                Console.WriteLine("3. Display All Contacts");
-                Console.WriteLine("4. Exit");
-                Console.Write("Enter your choice: ");
+                Console.WriteLine("3. Delete Contact");
+                Console.WriteLine("4. Display All Contacts");
+                Console.WriteLine("5. Exit");
+                Console.Write("Enter choice: ");
 
                 string choice = Console.ReadLine();
 
                 switch (choice)
                 {
                     case "1":
-                        Contact newContact = addressBook.CreateContactFromConsole();
-                        addressBook.AddContact(newContact);
+                        Contact c = addressBook.CreateContactFromConsole();
+                        addressBook.AddContact(c);
                         break;
 
                     case "2":
                         addressBook.EditContactUsingConsole();
                         break;
 
-                    case "3":
-                        addressBook.DisplayAllContacts();
+                    case "3":     // ✅ UC4 here
+                        addressBook.DeleteContactUsingConsole();
                         break;
 
                     case "4":
+                        addressBook.DisplayAllContacts();
+                        break;
+
+                    case "5":
                         running = false;
                         break;
 
                     default:
-                        Console.WriteLine("Invalid choice! Please try again.");
+                        Console.WriteLine("Invalid choice!");
                         break;
                 }
             }
