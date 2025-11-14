@@ -14,6 +14,11 @@ namespace Address_Book
         public string Phone { get; set; }
         public string Email { get; set; }
 
+        public override string ToString()
+        {
+            return $"{FirstName} {LastName} | {Address}, {City}, {State}, {Zip} | Phone: {Phone} | Email: {Email}";
+        }
+
         public void Display()
         {
             
@@ -46,6 +51,28 @@ namespace Address_Book
 
     public class AddressBook
     {
+        public void SortContactsByName()
+        {
+            if (contacts.Count == 0)
+            {
+                Console.WriteLine("\nNo contacts to sort.");
+                return;
+            }
+
+            contacts.Sort((c1, c2) =>
+            {
+                int firstCompare = string.Compare(c1.FirstName, c2.FirstName, StringComparison.OrdinalIgnoreCase);
+                if (firstCompare != 0)
+                    return firstCompare;
+
+                return string.Compare(c1.LastName, c2.LastName, StringComparison.OrdinalIgnoreCase);
+            });
+
+            Console.WriteLine("\nContacts sorted alphabetically by name:\n");
+            foreach (var contact in contacts)
+                Console.WriteLine(contact); // ToString() used here
+        }
+
         private readonly List<Contact> contacts = new List<Contact>();
 
         
@@ -227,6 +254,7 @@ namespace Address_Book
                 Console.WriteLine("6. Exit");
                 Console.Write("Enter choice: ");
 
+
                 string mainChoice = Console.ReadLine();
 
                 switch (mainChoice)
@@ -400,6 +428,7 @@ namespace Address_Book
                     case "6":
                         running = false;
                         break;
+
 
                     default:
                         Console.WriteLine("Invalid choice!");
